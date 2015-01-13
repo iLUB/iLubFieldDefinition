@@ -464,4 +464,22 @@ abstract class iLubFieldDefinitionContainerGUI {
 
 		return $table;
 	}
+
+    /**
+     * @param \iLubFieldDefinitionType[] $types
+     */
+    public function setTypes($types)
+    {
+        $this->types = $types;
+    }
+
+    /**
+     * @return \iLubFieldDefinitionType[]
+     */
+    public function getTypes()
+    {
+        return $this->types;
+    }
+
+
 }
