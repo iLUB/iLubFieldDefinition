@@ -69,7 +69,7 @@ class iLubFieldDefinitionTableGUI extends ilTable2GUI {
 		$this->setFormAction($this->ctrl->getFormAction($this->getParentObject(), $this->getParentCmd()));
 
 		if ($sortable) {
-			$tpl->addJavaScript('Customizing/global/plugins/Libraries/iLubFieldDefiniton/js/sortable.js');
+			$tpl->addJavaScript('Customizing/global/plugins/Libraries/iLubFieldDefinition/js/sortable.js');
 			$this->addColumn('', 'position', '20px');
 			$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 			$lng->loadLanguageModule('content');
@@ -94,7 +94,7 @@ class iLubFieldDefinitionTableGUI extends ilTable2GUI {
 		$this->enable('numinfo');
 		$this->enable('select_all');
 
-		$this->setRowTemplate('tpl.field_def_data_table_row.html', 'Customizing/global/plugins/Libraries/iLubFieldDefiniton/');
+		$this->setRowTemplate('tpl.field_def_data_table_row.html', 'Customizing/global/plugins/Libraries/iLubFieldDefinition/');
 	}
 
 
