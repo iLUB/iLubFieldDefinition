@@ -46,6 +46,10 @@ class iLubFieldDefinition {
 	 */
 	protected $name;
 	/**
+	 * @var string
+	 */
+	protected $short_title;
+	/**
 	 * @var int
 	 */
 	protected $type_id;
@@ -159,6 +163,22 @@ class iLubFieldDefinition {
 		$this->name = $name;
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getShortTitle()
+	{
+		return $this->short_title;
+	}
+
+	/**
+	 * @param string $short_title
+	 */
+	public function setShortTitle($short_title)
+	{
+		$this->short_title = $short_title;
+	}
+
 
 	/**
 	 * @return array
@@ -214,8 +234,8 @@ class iLubFieldDefinition {
 	protected function getNextPosition() {
 		$stmt = $this->db->prepare('SELECT MAX(position) next_pos FROM ' . $this->getTableName() .
 			' WHERE container_id = ?;', array('integer'));
-		$set = $this->db->execute($stmt, array($this->getContainerId()));
-		while ($rec = $this->db->fetchObject($set)) {
+		$this->db->execute($stmt, array($this->getContainerId()));
+		while ($rec = $this->db->fetchObject($stmt)) {
 			return $rec->next_pos + 1;
 		}
 
@@ -228,13 +248,14 @@ class iLubFieldDefinition {
 	 */
 	public function save() {
 		$stmt = $this->db->prepare('INSERT INTO ' . $this->getTableName() .
-			' (field_id, container_id, field_name, field_type, field_values, field_required, position) ' .
-			' VALUES (?, ?, ?, ?, ?, ?, ?);',
-			array('integer', 'integer', 'text', 'integer', 'text', 'integer', 'integer'));
+			' (field_id, container_id, field_name, short_title,field_type, field_values, field_required, position) ' .
+			' VALUES(?, ?, ?, ?, ?, ?, ?);',
+			array('integer', 'integer', 'text', 'text','integer', 'text', 'integer', 'integer'));
 		$this->setId($this->db->nextId($this->getTableName()));
 		$this->setPosition($this->getNextPosition());
 		$this->db->execute($stmt,
-			array($this->getId(), $this->getContainerId(), $this->getName(), $this->getTypeId(),
+			array($this->getId(), $this->getContainerId(), $this->getName(),
+					$this->getShortTitle(), $this->getTypeId(),
 				serialize($this->getValues()), $this->isRequired(), $this->getPosition()));
 	}
 
@@ -244,11 +265,13 @@ class iLubFieldDefinition {
 	 */
 	public function update() {
 		$stmt = $this->db->prepare('UPDATE ' . $this->getTableName() . ' SET ' .
-			'container_id = ?, field_name = ?, field_type = ?, field_values = ?, field_required = ?, position = ? ' .
+			'container_id = ?, field_name = ?, short_title = ?,field_type = ?,
+			field_values = ?, field_required = ?, position = ? ' .
 			'WHERE field_id = ?',
 			array('integer', 'text', 'integer', 'text', 'integer', 'integer', 'integer'));
 
-		$this->db->execute($stmt, array($this->getContainerId(), $this->getName(), $this->getTypeId(),
+		$this->db->execute($stmt, array($this->getContainerId(), $this->getName(),
+				$this->getShortTitle(), $this->getTypeId(),
 			serialize($this->getValues()), $this->isRequired(), $this->getPosition(), $this->getId()));
 	}
 
@@ -268,9 +291,9 @@ class iLubFieldDefinition {
 	protected function read() {
 		$stmt = $this->db->prepare('SELECT * FROM ' . $this->getTableName() . ' WHERE field_id = ? ORDER BY position ASC;',
 			array('integer'));
-		$res = $this->db->execute($stmt, array($this->getId()));
+		$this->db->execute($stmt, array($this->getId()));
 
-		$row = $res->fetchRow(DB_FETCHMODE_OBJECT);
+		$row = $stmt->fetch(PDO::FETCH_OBJ);
 		$this->setValuesFromRecord($row);
 	}
 
@@ -296,40 +319,45 @@ class iLubFieldDefinition {
 	 */
 	protected function getDbFields() {
 		$fields = array(
-			'field_id' => array(
-				'type' => 'integer',
-				'length' => 4,
-				'notnull' => true
-			),
-			'container_id' => array(
-				'type' => 'integer',
-				'length' => 4,
-				'notnull' => true
-			),
-			'field_name' => array(
-				'type' => 'text',
-				'length' => 255,
-				'notnull' => false
-			),
-			'field_type' => array(
-				'type' => 'integer',
-				'length' => 2,
-				'notnull' => true
-			),
-			'field_values' => array(
-				'type' => 'clob',
-				'notnull' => false
-			),
-			'field_required' => array(
-				'type' => 'integer',
-				'length' => 1,
-				'notnull' => true
-			),
-			'position' => array(
-				'type' => 'integer',
-				'length' => 4,
-				'notnull' => true
-			)
+				'field_id' => array(
+						'type' => 'integer',
+						'length' => 4,
+						'notnull' => true
+				),
+				'container_id' => array(
+						'type' => 'integer',
+						'length' => 4,
+						'notnull' => true
+				),
+				'field_name' => array(
+						'type' => 'text',
+						'length' => 255,
+						'notnull' => false
+				),
+				'short_title' => array(
+						'type' => 'text',
+						'length' => 255,
+						'notnull' => false
+				),
+				'field_type' => array(
+						'type' => 'integer',
+						'length' => 2,
+						'notnull' => true
+				),
+				'field_values' => array(
+						'type' => 'clob',
+						'notnull' => false
+				),
+				'field_required' => array(
+						'type' => 'integer',
+						'length' => 1,
+						'notnull' => true
+				),
+				'position' => array(
+						'type' => 'integer',
+						'length' => 4,
+						'notnull' => true
+				)
 		);
 
 		return $fields;
@@ -342,6 +370,7 @@ class iLubFieldDefinition {
 	protected function setValuesFromRecord($rec) {
 		$this->setContainerId($rec->container_id);
 		$this->setName($rec->field_name);
+		$this->setShortTitle($rec->short_title);
 		$this->setTypeId($rec->field_type);
 		$this->setValues(unserialize($rec->field_values));
 		$this->enableRequired($rec->field_required);

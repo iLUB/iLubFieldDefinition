@@ -212,6 +212,7 @@ abstract class iLubFieldDefinitionContainerGUI {
 		if ($this->form->checkInput()) {
 			$field = $this->container->getFactory()->createILubFieldDefinition($this->container->getId());
 			$field->setName($this->form->getInput('name'));
+			$field->setShortTitle($this->form->getInput('short_title'));
 			$field->setTypeId($this->form->getInput('type'));
 			$field->setValues($this->getFormValuesByTypeId($field->getTypeId()));
 			$field->enableRequired($this->form->getInput('required'));
@@ -248,6 +249,8 @@ abstract class iLubFieldDefinitionContainerGUI {
 		/** @var ilTextInputGUI $item */
 		$item = $this->form->getItemByPostVar('name');
 		$item->setValue($field->getName());
+		$item = $this->form->getItemByPostVar('short_title');
+		$item->setValue($field->getShortTitle());
 		/** @var ilRadioGroupInputGUI $item */
 		$item = $this->form->getItemByPostVar('type');
 		$item->setValue($field->getTypeId());
@@ -271,6 +274,8 @@ abstract class iLubFieldDefinitionContainerGUI {
 			$field = $this->container->getFactory()->createILubFieldDefinition($this->container->getId(),
 				(int)$_REQUEST['field_id']);
 			$field->setName($this->form->getInput('name'));
+			$field->setShortTitle($this->form->getInput('short_title'));
+
 			$field->setTypeId($this->form->getInput('type'));
 			$field->setValues($this->getFormValuesByTypeId($field->getTypeId()));
 			$field->enableRequired($this->form->getInput('required'));
@@ -330,6 +335,13 @@ abstract class iLubFieldDefinitionContainerGUI {
 
 		// Name
 		$na = new ilTextInputGUI($lng->txt('name'), 'name');
+		$na->setSize(32);
+		$na->setMaxLength(255);
+		$na->setRequired(true);
+		$this->form->addItem($na);
+
+		// Name
+		$na = new ilTextInputGUI($lng->txt('short_inst_name'), 'short_title');
 		$na->setSize(32);
 		$na->setMaxLength(255);
 		$na->setRequired(true);
@@ -413,13 +425,13 @@ abstract class iLubFieldDefinitionContainerGUI {
 		}
 
 		$values = array();
-		foreach ($post_values as $value) {
+		foreach ($post_values as $key => $value) {
 			$value = trim(ilUtil::stripSlashes($value));
 			if (strlen($value)) {
-				$values[] = $value;
+				$values[$key] = $value;
 			}
 		}
-		sort($values);
+
 
 		return $values;
 

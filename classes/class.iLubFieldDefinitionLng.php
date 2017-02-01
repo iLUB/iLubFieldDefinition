@@ -83,4 +83,57 @@ class iLubFieldDefinitionLng {
 			return 'Saved order';
 		}
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getMatrixScale() {
+		global $ilUser;
+
+		if ($ilUser->getCurrentLanguage() == 'de') {
+			return 'Skala';
+		} else {
+			return 'Scale';
+		}
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getMatrixScaleDescription() {
+		global $ilUser;
+
+		if ($ilUser->getCurrentLanguage() == 'de') {
+			return 'Skala der Matrixfrage (horizontal)';
+		} else {
+			return 'Scale of the Matrix question (horizontal)';
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMatrixQuestion() {
+		global $ilUser;
+
+		if ($ilUser->getCurrentLanguage() == 'de') {
+			return 'Fragen';
+		} else {
+			return 'Fragen';
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMatrixQuestionDescription() {
+		global $ilUser;
+
+		if ($ilUser->getCurrentLanguage() == 'de') {
+			return 'Liste mit Fragen (vertikal)';
+		} else {
+			return 'List with questions (vertical)';
+		}
+	}
 }

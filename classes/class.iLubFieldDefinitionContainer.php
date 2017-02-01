@@ -84,13 +84,14 @@ class iLubFieldDefinitionContainer {
 		$field = $this->factory->createILubFieldDefinition();
 		$stmt = $this->db->prepare('SELECT * FROM ' . $field->getTableName() . ' WHERE container_id = ? ORDER BY position ASC;',
 			array('integer'));
-		$res = $this->db->execute($stmt, array($this->getId()));
+		$this->db->execute($stmt, array($this->getId()));
 
-		while ($row = $this->db->fetchObject($res)) {
+		while ($row = $this->db->fetchObject($stmt)) {
 			$field = $this->factory->createILubFieldDefinition();
 			$field->setId($row->field_id);
 			$field->setContainerId($this->getId());
 			$field->setName($row->field_name);
+			$field->setShortTitle($row->short_title);
 			$field->setTypeId($row->field_type);
 			$field->setValues(unserialize($row->field_values));
 			$field->enableRequired($row->field_required);

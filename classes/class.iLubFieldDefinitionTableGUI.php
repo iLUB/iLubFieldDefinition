@@ -81,6 +81,7 @@ class iLubFieldDefinitionTableGUI extends ilTable2GUI {
 			$this->setDefaultOrderDirection('asc');
 		}
 		$this->addColumn($this->lng->txt('name'), $column_sorting ? 'name' : false, 'auto');
+		$this->addColumn($this->lng->txt('short_inst_name'), $column_sorting ? 'short_title' : false, 'short_title');
 		$this->addColumn($this->lng->txt('type'), $column_sorting ? 'type' : false, 'auto');
 		$this->addColumn($this->lng->txt('required_field'), '', 'auto');
 		$this->addColumn($this->lng->txt('actions'), '', 'auto');
@@ -111,6 +112,8 @@ class iLubFieldDefinitionTableGUI extends ilTable2GUI {
 		}
 		$this->tpl->setVariable('VAL_ID', $row['field_id']);
 		$this->tpl->setVariable('VAL_NAME', $row['name']);
+		$this->tpl->setVariable('VAL_SHORT_TITLE', $row['short_title']);
+
 		$this->tpl->setVariable('VAL_TYPE', $row['type']);
 		$this->tpl->setVariable('REQUIRED_CHECKED', $row['required'] ? 'checked="checked"' : '');
 
@@ -142,6 +145,7 @@ class iLubFieldDefinitionTableGUI extends ilTable2GUI {
 				$item = array();
 				$item['field_id'] = $field->getId();
 				$item['name'] = $field->getName();
+				$item['short_title'] = $field->getShortTitle();
 
 				$type = iLubFieldDefinitionType::getTypeByTypeId($field->getTypeId(), $this->types);
 				if ($type instanceof iLubFieldDefinitionType) {

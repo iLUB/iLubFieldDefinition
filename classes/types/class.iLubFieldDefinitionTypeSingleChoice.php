@@ -23,15 +23,16 @@
 require_once('Customizing/global/plugins/Libraries/iLubFieldDefinition/classes/types/class.iLubFieldDefinitionType.php');
 
 /**
- * Class iLubFieldDefinitionTypeText
+ * Class iLubFieldDefinitionTypeSelect
  *
- * @author  Fabio Heer <fabio.heer@ilub.unibe.ch>
+ * @author  Timon Amstutz <timon.amstutz@ilub.unibe.ch>
  * @version $Id$
  */
-class iLubFieldDefinitionTypeText extends iLubFieldDefinitionType {
+class iLubFieldDefinitionTypeSingleChoice extends
+		iLubFieldDefinitionTypeSelect {
 
 
-	const TYPE_ID = 1;
+	const TYPE_ID = 3;
 
 	/**
 	 * @return int
@@ -48,36 +49,8 @@ class iLubFieldDefinitionTypeText extends iLubFieldDefinitionType {
 	 */
 	public function getTypeName() {
 		global $lng;
-		$lng->loadLanguageModule('ps');
-
-		return $lng->txt('ps_type_txt_long');
-	}
-
-
-	/**
-	 * @param iLubFieldDefinitionTypeOption $option
-	 *
-	 * @return iLubFieldDefinitionTypeOption
-	 */
-	public function getValueDefinitionInputGUI(iLubFieldDefinitionTypeOption &$option) {
-		return $option;
-	}
-
-
-	/**
-	 * @param iLubFieldDefinitionTypeOption $item
-	 * @param array                         $values
-	 */
-	public function setValues(iLubFieldDefinitionTypeOption $item, $values = array()) {}
-
-
-	/**
-	 * @param ilPropertyFormGUI $form
-	 *
-	 * @return array
-	 */
-	public function getValues(ilPropertyFormGUI $form) {
-		return array();
+		$lng->loadLanguageModule('assessment');
+		return $lng->txt('assSingleChoice');
 	}
 
 
@@ -89,10 +62,15 @@ class iLubFieldDefinitionTypeText extends iLubFieldDefinitionType {
 	 * @return ilFormPropertyGUI
 	 */
 	public function getPresentationInputGUI($title, $postvar, $values) {
-		$text = new ilTextInputGUI($title, $postvar);
-		$text->setSize(32);
-		$text->setMaxLength(255);
+		require_once('Customizing/global/plugins/Libraries/InputGUIs/classes/class.ilRadioGroupInputGUIwrapper.php');
+		$select = new ilRadioGroupInputGUIwrapper($title, $postvar);
 
-		return $text;
+		foreach($values as $key => $value)
+		{
+
+			$select->addOption(new ilRadioOption($value,$key));
+		}
+
+		return $select;
 	}
 }

@@ -28,10 +28,9 @@ require_once('Customizing/global/plugins/Libraries/iLubFieldDefinition/classes/t
  * @author  Fabio Heer <fabio.heer@ilub.unibe.ch>
  * @version $Id$
  */
-class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
+class iLubFieldDefinitionTypeMatrix extends iLubFieldDefinitionType {
 
-
-	const TYPE_ID = 2;
+	const TYPE_ID = 4;
 
 	/**
 	 * @return int
@@ -48,9 +47,9 @@ class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
 	 */
 	public function getTypeName() {
 		global $lng;
-		$lng->loadLanguageModule('ps');
+		$lng->loadLanguageModule('survey');
 
-		return $lng->txt('ps_type_select_long');
+		return $lng->txt('SurveyMatrixQuestion');
 	}
 
 
@@ -60,15 +59,29 @@ class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
 	 * @return iLubFieldDefinitionTypeOption
 	 */
 	public function getValueDefinitionInputGUI(iLubFieldDefinitionTypeOption &$option) {
-		global $lng;
-
 		// Select Type Values
 		require_once('Services/Form/classes/class.ilTextWizardInputGUI.php');
-		$ty_se_mu = new ilTextWizardInputGUI($lng->txt('value'), 'value_' . $this->getId());
+		require_once('Customizing/global/plugins/Libraries/iLubFieldDefinition/classes/class.iLubFieldDefinitionLng.php');
+		$lng = new iLubFieldDefinitionLng();
+
+		$ty_se_mu = new ilTextWizardInputGUI($lng->getMatrixScale(), 'scale_' .
+				$this->getId());
 		$ty_se_mu->setRequired(true);
 		$ty_se_mu->setSize(32);
 		$ty_se_mu->setMaxLength(128);
 		$ty_se_mu->setValues(array(''));
+		$ty_se_mu->setInfo($lng->getMatrixScaleDescription());
+		$option->addSubItem($ty_se_mu);
+
+		$ty_se_mu = new ilTextWizardInputGUI($lng->getMatrixQuestion(),
+				'question_' .
+				$this->getId());
+		$ty_se_mu->setRequired(true);
+		$ty_se_mu->setSize(64);
+		$ty_se_mu->setMaxLength(128);
+		$ty_se_mu->setValues(array(''));
+		$ty_se_mu->setInfo($lng->getMatrixQuestionDescription());
+
 		$option->addSubItem($ty_se_mu);
 
 		return $option;
@@ -80,13 +93,42 @@ class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
 	 * @param array                         $values
 	 */
 	public function setValues(iLubFieldDefinitionTypeOption $item, $values = array()) {
+		$scale_values = self::getScaleFromArray($values);
+		$question_values = self::getQuestionsFromArray($values);
+
 		foreach ($item->getSubItems() as $sub_item) {
-			if ($sub_item instanceof ilTextWizardInputGUI AND $sub_item->getPostVar() == 'value_' . $this->getId()) {
-				$sub_item->setValue($values);
+			if ($sub_item instanceof ilTextWizardInputGUI AND
+					$sub_item->getPostVar() == 'scale_' . $this->getId()) {
+				$sub_item->setValue($scale_values);
+			}else if($sub_item instanceof ilTextWizardInputGUI AND
+					$sub_item->getPostVar() == 'question_' . $this->getId()){
+				$sub_item->setValue($question_values);
 			}
 		}
 	}
 
+
+	public static function getQuestionsFromArray($data){
+		$questions = [];
+
+		foreach($data as $key => $value){
+			if (strpos($key, 'question_') !== false) {
+				$questions[$key] = $value;
+			}
+		}
+		return $questions;
+	}
+
+	public static function getScaleFromArray($data){
+		$scale = [];
+
+		foreach($data as $key => $value){
+			if (strpos($key, 'scale_') !== false) {
+				$scale[$key] = $value;
+			}
+		}
+		return $scale;
+	}
 
 	/**
 	 * @param ilPropertyFormGUI $form
@@ -94,8 +136,21 @@ class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
 	 * @return array
 	 */
 	public function getValues(ilPropertyFormGUI $form) {
-		return $form->getInput('value_' . $this->getId());
+
+		$scale = [];
+		$questions = [];
+
+		foreach($form->getInput('scale_' . $this->getId()) as $key => $item){
+			$scale["scale_".$key] = $item;
+		}
+
+		foreach($form->getInput('question_' . $this->getId()) as $key => $item){
+			$questions["question_".$key] = $item;
+		}
+		return array_merge($scale,$questions);
 	}
+
+
 
 
 	/**
@@ -106,16 +161,26 @@ class iLubFieldDefinitionTypeSelect extends iLubFieldDefinitionType {
 	 * @return ilFormPropertyGUI
 	 */
 	public function getPresentationInputGUI($title, $postvar, $values) {
-		require_once('Customizing/global/plugins/Libraries/InputGUIs/classes/class.ilSelectInputGUIwithDefaultText.php');
-		$select = new ilSelectInputGUIwithDefaultText($title, $postvar);
+		require_once('Customizing/global/plugins/Libraries/InputGUIs/classes/class.ilMatrixFieldInputGUI.php');
+		require_once('Customizing/global/plugins/Libraries/InputGUIs/classes/class.ilMatrixHeaderGUI.php');
 
-		$options = array();
-		foreach($values as $key => $value)
-		{
-			$options[$key] = $value;
+		$scale_values = self::getScaleFromArray($values);
+		$question_values = self::getQuestionsFromArray($values);
+
+		$matrix_items = [];
+
+		$header = new ilMatrixHeaderGUI($title);
+		$header->setScale($scale_values);
+		$matrix_items[] = $header;
+
+		foreach($question_values as $key => $question_value){
+			$input_item = new ilMatrixFieldInputGUI($question_value,
+					"".$postvar."[".$key."]");
+			$input_item->setScale($scale_values);
+			$matrix_items[] = $input_item;
 		}
-		$select->setOptions($options);
 
-		return $select;
+
+		return $matrix_items;
 	}
 }
