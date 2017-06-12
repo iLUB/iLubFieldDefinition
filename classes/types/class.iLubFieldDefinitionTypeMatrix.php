@@ -169,7 +169,7 @@ class iLubFieldDefinitionTypeMatrix extends iLubFieldDefinitionType {
 
 		$matrix_items = [];
 
-		$header = new ilMatrixHeaderGUI($title);
+		$header = new ilMatrixHeaderGUI($title,$postvar);
 		$header->setScale($scale_values);
 		$matrix_items[] = $header;
 
@@ -179,7 +179,6 @@ class iLubFieldDefinitionTypeMatrix extends iLubFieldDefinitionType {
 			$input_item->setScale($scale_values);
 			$matrix_items[] = $input_item;
 		}
-
 
 		return $matrix_items;
 	}
